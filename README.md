@@ -258,6 +258,30 @@ The `gws-shared` skill includes an `install` block so OpenClaw auto-installs the
 
 Installing this extension gives your Gemini CLI agent direct access to all `gws` commands and Google Workspace agent skills. Because `gws` handles its own authentication securely, you simply need to authenticate your terminal once prior to using the agent, and the extension will automatically inherit your credentials.
 
+## Will Desktop Command Wrapper
+
+Will Desktop exposes Google Workspace through its own conversation-scoped CLI
+wrapper. Use `gws` directly in a normal shell; use `will google ...` when a
+desktop-local agent needs the command to execute through the active Will
+conversation, remote policy, and OAuth-backed tool runner.
+
+```bash
+# Discover Google Docs methods available to the current conversation
+will google --conversation-id CONVERSATION_ID docs list-methods
+
+# Inspect a method schema before calling it
+will google --conversation-id CONVERSATION_ID docs describe-method documents.get
+
+# Call a method through Will's Google Workspace broker
+will google --conversation-id CONVERSATION_ID docs documents.get \
+  --path-params '{"documentId":"DOCUMENT_ID"}'
+```
+
+`WILL_CONVERSATION_ID` can be set instead of passing `--conversation-id` on
+every command. The wrapper maps to the same typed Google Workspace tool surface
+as `will google broker ...`; it does not bypass Will approvals, tenant scope, or
+connector authentication.
+
 ## Advanced Usage
 
 ### Multipart Uploads

@@ -19,6 +19,25 @@ metadata:
 gws docs <resource> <method> [flags]
 ```
 
+## Will Desktop Wrapper
+
+Inside Will Desktop, use the conversation-scoped wrapper when the command must
+run through Will's Google Workspace broker instead of local `gws` credentials:
+
+```bash
+# List methods for Google Docs
+will google --conversation-id CONVERSATION_ID docs list-methods
+
+# Inspect a method schema
+will google --conversation-id CONVERSATION_ID docs describe-method documents.get
+
+# Call a method
+will google --conversation-id CONVERSATION_ID docs documents.get \
+  --path-params '{"documentId":"DOCUMENT_ID"}'
+```
+
+`WILL_CONVERSATION_ID` can be set instead of passing `--conversation-id`.
+
 ## Helper Commands
 
 | Command | Description |
@@ -46,4 +65,3 @@ gws schema docs.<resource>.<method>
 ```
 
 Use `gws schema` output to build your `--params` and `--json` flags.
-
