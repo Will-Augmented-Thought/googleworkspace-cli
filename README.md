@@ -298,7 +298,7 @@ Time-aware helpers (`+agenda`, `+standup-report`, `+weekly-digest`, `+meeting-pr
 Run `gws <service> --help` to see both Discovery methods and helper commands together.
 
 ```bash
-gws gmail --help      # shows +send, +reply, +reply-all, +forward, +triage, +watch …
+gws gmail --help      # shows +send, +reply, +reply-all, +forward, +triage, +read, +download-attachments, +watch ...
 gws calendar --help   # shows +insert, +agenda …
 gws drive --help      # shows +upload …
 ```
@@ -312,6 +312,8 @@ gws drive --help      # shows +upload …
 | `gmail` | `+reply-all` | Reply-all to a message |
 | `gmail` | `+forward` | Forward a message to new recipients |
 | `gmail` | `+triage` | Show unread inbox summary (sender, subject, date) |
+| `gmail` | `+read` | Read a message and extract its body or headers |
+| `gmail` | `+download-attachments` | Download attachments from a Gmail message |
 | `gmail` | `+watch` | Watch for new emails and stream them as NDJSON |
 | `sheets` | `+append` | Append a row to a spreadsheet |
 | `sheets` | `+read` | Read values from a spreadsheet |

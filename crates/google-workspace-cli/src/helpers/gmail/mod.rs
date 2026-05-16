@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use super::Helper;
+pub mod download;
 pub mod forward;
 pub mod read;
 pub mod reply;
@@ -20,6 +21,7 @@ pub mod send;
 pub mod triage;
 pub mod watch;
 
+use download::handle_download_attachments;
 use forward::handle_forward;
 use read::handle_read;
 use reply::handle_reply;
@@ -1570,7 +1572,8 @@ fn common_reply_args(cmd: Command) -> Command {
 
 impl Helper for GmailHelper {
     /// Register all Gmail helper subcommands (`+send`, `+reply`, `+reply-all`,
-    /// `+forward`, `+triage`, `+watch`) with their arguments and help text.
+    /// `+forward`, `+triage`, `+read`, `+download-attachments`, `+watch`) with
+    /// their arguments and help text.
     fn inject_commands(
         &self,
         mut cmd: Command,
@@ -1839,6 +1842,8 @@ TIPS:
                 ),
         );
 
+        cmd = cmd.subcommand(download::command());
+
         cmd = cmd.subcommand(
             Command::new("+watch")
                 .about("[Helper] Watch for new emails and stream them as NDJSON")
@@ -1958,6 +1963,11 @@ TIPS:
 
             if let Some(matches) = matches.subcommand_matches("+read") {
                 handle_read(doc, matches).await?;
+                return Ok(true);
+            }
+
+            if let Some(matches) = matches.subcommand_matches("+download-attachments") {
+                handle_download_attachments(matches).await?;
                 return Ok(true);
             }
 
@@ -2331,6 +2341,7 @@ mod tests {
         assert!(subcommands.contains(&"+reply-all"));
         assert!(subcommands.contains(&"+forward"));
         assert!(subcommands.contains(&"+read"));
+        assert!(subcommands.contains(&"+download-attachments"));
     }
 
     #[test]
