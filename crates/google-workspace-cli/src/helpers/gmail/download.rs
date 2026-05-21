@@ -26,6 +26,7 @@ struct DownloadAttachmentsConfig {
     output_dir: PathBuf,
     include_inline: bool,
     overwrite: bool,
+    dry_run: bool,
 }
 
 #[derive(Debug)]
@@ -52,6 +53,7 @@ struct DownloadedAttachment {
 struct DownloadAttachmentsResult {
     message_id: String,
     output_dir: String,
+    dry_run: bool,
     downloaded_count: usize,
     skipped_inline_count: usize,
     attachments: Vec<DownloadedAttachment>,
@@ -106,6 +108,19 @@ TIPS:
 pub(super) async fn handle_download_attachments(matches: &ArgMatches) -> Result<(), GwsError> {
     let config = parse_download_config(matches)?;
 
+    if config.dry_run {
+        let result = DownloadAttachmentsResult {
+            message_id: config.message_id,
+            output_dir: display_path(config.output_dir.as_path()),
+            dry_run: true,
+            downloaded_count: 0,
+            skipped_inline_count: 0,
+            attachments: Vec::new(),
+        };
+        print_download_result(&result)?;
+        return Ok(());
+    }
+
     let token = auth::get_token(&[GMAIL_READONLY_SCOPE])
         .await
         .map_err(|e| GwsError::Auth(format!("Gmail auth failed: {e}")))?;
@@ -132,6 +147,7 @@ pub(super) async fn handle_download_attachments(matches: &ArgMatches) -> Result<
         let result = DownloadAttachmentsResult {
             message_id: config.message_id,
             output_dir: display_path(config.output_dir.as_path()),
+            dry_run: false,
             downloaded_count: 0,
             skipped_inline_count,
             attachments: Vec::new(),
@@ -172,6 +188,7 @@ pub(super) async fn handle_download_attachments(matches: &ArgMatches) -> Result<
     let result = DownloadAttachmentsResult {
         message_id: config.message_id,
         output_dir: display_path(config.output_dir.as_path()),
+        dry_run: false,
         downloaded_count: downloaded.len(),
         skipped_inline_count,
         attachments: downloaded,
@@ -196,6 +213,7 @@ fn parse_download_config(matches: &ArgMatches) -> Result<DownloadAttachmentsConf
         output_dir,
         include_inline: matches.get_flag("include-inline"),
         overwrite: matches.get_flag("overwrite"),
+        dry_run: matches.get_flag("dry-run"),
     })
 }
 
@@ -399,6 +417,36 @@ mod tests {
         assert!(matches
             .subcommand_matches("+download-attachments")
             .is_some());
+    }
+
+    #[tokio::test]
+    async fn handle_dry_run_returns_before_auth() {
+        let cmd = Command::new("gws")
+            .arg(
+                Arg::new("dry-run")
+                    .long("dry-run")
+                    .action(ArgAction::SetTrue)
+                    .global(true),
+            )
+            .subcommand(Command::new("gmail").subcommand(command()));
+        let matches = cmd
+            .try_get_matches_from([
+                "gws",
+                "gmail",
+                "+download-attachments",
+                "--id",
+                "msg-1",
+                "--output-dir",
+                "downloads",
+                "--dry-run",
+            ])
+            .unwrap();
+        let gmail_matches = matches.subcommand_matches("gmail").unwrap();
+        let download_matches = gmail_matches
+            .subcommand_matches("+download-attachments")
+            .unwrap();
+
+        handle_download_attachments(download_matches).await.unwrap();
     }
 
     #[test]
