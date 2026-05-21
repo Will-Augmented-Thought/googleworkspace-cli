@@ -10,6 +10,7 @@ permissions:
   id-token: write
 
 on:
+  workflow_dispatch:
   pull_request:
   push:
     tags:
@@ -155,8 +156,8 @@ jobs:
           
           \`\`\`bash
           # 1. Download the archive and its checksum
-          curl -sLO https://github.com/googleworkspace/cli/releases/download/${{ github.ref_name }}/google-workspace-cli-<target>.tar.gz
-          curl -sLO https://github.com/googleworkspace/cli/releases/download/${{ github.ref_name }}/google-workspace-cli-<target>.tar.gz.sha256
+          curl -sLO https://github.com/Will-Augmented-Thought/googleworkspace-cli/releases/download/${{ github.ref_name }}/google-workspace-cli-<target>.tar.gz
+          curl -sLO https://github.com/Will-Augmented-Thought/googleworkspace-cli/releases/download/${{ github.ref_name }}/google-workspace-cli-<target>.tar.gz.sha256
           
           # 2. Verify the checksum
           shasum -a 256 -c google-workspace-cli-<target>.tar.gz.sha256
